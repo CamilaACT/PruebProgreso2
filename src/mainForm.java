@@ -49,7 +49,7 @@ public class mainForm extends JFrame {
                 validarTxt[3]=validar.validacionStringInt(textIngresoPreparacion.getText());
                 if(validarTxt[0]==false){
                     if(validarTxt[1]&&validarTxt[2]&&validarTxt[3]){
-                        if(menu.addPlato(new Plato(textIngresoNombre.getText(),Double.parseDouble(textIngresoPrecio.getText()),Double.parseDouble(textIngresoCalorias.getText()),Integer.parseInt(textIngresoPreparacion.getText())))){
+                        if(menu.ingresarPlato(new Plato(textIngresoNombre.getText(),Double.parseDouble(textIngresoPrecio.getText()),Double.parseDouble(textIngresoCalorias.getText()),Integer.parseInt(textIngresoPreparacion.getText())))){
                             textAIngresoPlatos.setText("Plato Ingresado Correctamente");
                         }else{
                             textAIngresoPlatos.setText("Ya existe un plato con ese nombre");
@@ -77,13 +77,13 @@ public class mainForm extends JFrame {
         buscarModifButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Plato plato=menu.busquedaPlato(textoModifNombre.getText());
+                Plato plato=menu.BuscarPorNombre(textoModifNombre.getText());
                 if(plato==null){
                     textoModifNombre.setText("No hay un plato con ese nombre");
                 }else{
                     textoModifPrecio.setText(String.valueOf(plato.getPrecio()));
-                    textoModifCalorias.setText(String.valueOf(plato.getValorCalorico()));
-                    textoModifPreparacion.setText(String.valueOf(plato.getTiempopreparacio()));
+                    textoModifCalorias.setText(String.valueOf(plato.getCalorias()));
+                    textoModifPreparacion.setText(String.valueOf(plato.getTiempo()));
                     textoModifPrecio.setEnabled(true);
                     textoModifPrecio.setEditable(true);
                     textoModifCalorias.setEnabled(true);
@@ -107,10 +107,10 @@ public class mainForm extends JFrame {
                 validarTxt[3]=validar.validacionStringInt(textoModifPreparacion.getText());
                 if(validarTxt[0]==false){
                     if(validarTxt[1]&&validarTxt[2]&&validarTxt[3]){
-                        Plato plato=menu.busquedaPlato(textoModifNombre.getText());
+                        Plato plato=menu.BuscarPorNombre(textoModifNombre.getText());
                         plato.setPrecio(Double.parseDouble(textoModifPrecio.getText()));
-                        plato.setValorCalorico(Double.parseDouble(textoModifCalorias.getText()));
-                        plato.setTiempopreparacio(Integer.parseInt(textoModifPreparacion.getText()));
+                        plato.setCalorias(Double.parseDouble(textoModifCalorias.getText()));
+                        plato.setTiempo(Integer.parseInt(textoModifPreparacion.getText()));
                         textAModif.setText(plato.toString());
                         buscarModifButton.setEnabled(true);
 
@@ -135,7 +135,7 @@ public class mainForm extends JFrame {
         ButtonBuscarEliminar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Plato plato=menu.busquedaPlato(textNombreEliminar.getText());
+                Plato plato=menu.BuscarPorNombre(textNombreEliminar.getText());
                 if(plato==null){
                     textAEliminar.setText("No hay un plato con ese nombre");
                 }else{
@@ -149,11 +149,11 @@ public class mainForm extends JFrame {
         eliminarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Plato plato=menu.busquedaPlato(textNombreEliminar.getText());
+                Plato plato=menu.BuscarPorNombre(textNombreEliminar.getText());
                 if(plato==null){
                     textAEliminar.setText("No hay un plato con ese nombre");
                 }else{
-                    menu.removePlatoPorNombre(textNombreEliminar.getText());
+                    menu.eliminarPlato(textNombreEliminar.getText());
                     textAEliminar.setText("Plato eliminado");
                     ButtonBuscarEliminar.setEnabled(true);
                 }
@@ -163,19 +163,81 @@ public class mainForm extends JFrame {
         mostrarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                switch (comboBoxOrder.getSelectedIndex()){
+                    case 0: //Cuando seleccione Nombre
+                        menu.ordenarPorNombre();
+                        textAMostrar.setText(menu.toString());
+                        break;
+                    case 1: //Cuando seleccione Precio
+                        menu.ordenarPorPrecio();
+                        textAMostrar.setText(menu.toString());
+                        break;
+
+                    case 2: //Cuando seleccione Calorías
+                        menu.ordenarPorCalorias();
+                        textAMostrar.setText(menu.toString());
+                        break;
+                    case 3: //Cuando seleccione Tiempo de Preparación
+                        menu.ordenarPorTiempo();
+                        textAMostrar.setText(menu.toString());
+                        break;
+
+
+                }
+
 
             }
         });
 
-        mostrarButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
-        });
         buscarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String opcionSeleccionada = comboBoxOrder.getSelectedItem().toString();
+                //int opcion=comboBoxOrder.getSelectedIndex();
+                switch (opcionSeleccionada) {
+                    case "Nombre":
+                            textAMostrar.setText(menu.buscarPlato(textBuscarPlatoOrden.getText(), opcionSeleccionada).toString());
+                            if(textAMostrar.getText().equals("[]")){
+                                textAMostrar.append("No se encontraron resultados de busqueda");
+                            }
+                            break;
+                    case "Precio":
+                        if(validar.validacionStringDouble(textBuscarPlatoOrden.getText())){
+                            textAMostrar.setText(menu.buscarPlato(textBuscarPlatoOrden.getText(), opcionSeleccionada).toString());
+                            if(textAMostrar.getText().equals("[]")){
+                                textAMostrar.append("No se encontraron resultados de busqueda");
+                            }
+                        }
+                        else{
+                            textAMostrar.setText("Ingrese un precio válido");
+                        }
+                        break;
+                    case "Calorias":
+                        if(validar.validacionStringDouble(textBuscarPlatoOrden.getText())){
+                            textAMostrar.setText(menu.buscarPlato(textBuscarPlatoOrden.getText(), opcionSeleccionada).toString());
+                            if(textAMostrar.getText().equals("[]")){
+                                textAMostrar.append("No se encontraron resultados de busqueda");
+                            }
+                        }
+                        else{
+                            textAMostrar.setText("Ingrese calorias válido");
+                        }
+                        break;
+                    case "Tiempo":
+                        if(validar.validacionStringInt(textBuscarPlatoOrden.getText())){
+                            textAMostrar.setText(menu.buscarPlato(textBuscarPlatoOrden.getText(), opcionSeleccionada).toString());
+                            if(textAMostrar.getText().equals("[]")){
+                                textAMostrar.append("No se encontraron resultados de busqueda");
+                            }
+                        }
+                        else{
+                            textAMostrar.setText("Ingrese una cantidad entera de minutos");
+                        }
+                        break;
+                }
+
+
+
 
             }
         });
